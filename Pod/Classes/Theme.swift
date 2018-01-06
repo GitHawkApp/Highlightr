@@ -38,8 +38,8 @@ open class Theme {
     /// Italic font to be used by this theme
     open var italicCodeFont : RPFont!
     
-    private var themeDict : RPThemeDict!
-    private var strippedTheme : RPThemeStringDict!
+    fileprivate var themeDict : RPThemeDict!
+    fileprivate var strippedTheme : RPThemeStringDict!
     
     /// Default background color for the current theme.
     open var themeBackgroundColor : RPColor!
@@ -49,10 +49,10 @@ open class Theme {
      
      - parameter themeString: Theme to use.
      */
-    init(themeString: String)
+    init(themeString: String, fontSize: CGFloat)
     {
         theme = themeString
-        setCodeFont(RPFont(name: "Courier", size: 14)!)
+        setCodeFont(RPFont(name: "Courier", size: fontSize)!)
         strippedTheme = stripTheme(themeString)
         lightTheme = strippedThemeToString(strippedTheme)
         themeDict = strippedThemeToTheme(strippedTheme)
@@ -98,12 +98,12 @@ open class Theme {
         let obliqueDescriptor = UIFontDescriptor(fontAttributes: [UIFontDescriptor.AttributeName.family:font.familyName,
                                                                   UIFontDescriptor.AttributeName.face:"Oblique"])
         #else
-        let boldDescriptor = NSFontDescriptor(fontAttributes: [.family:font.familyName!,
-                                                                   .face:"Bold"])
-        let italicDescriptor = NSFontDescriptor(fontAttributes: [.family:font.familyName!,
-                                                                     .face:"Italic"])
-        let obliqueDescriptor = NSFontDescriptor(fontAttributes: [.family:font.familyName!,
-                                                                      .face:"Oblique"])
+        let boldDescriptor = NSFontDescriptor(fontAttributes: [NSFontFamilyAttribute:font.familyName!,
+                                                                NSFontFaceAttribute:"Bold"])
+        let italicDescriptor = NSFontDescriptor(fontAttributes: [NSFontFamilyAttribute:font.familyName!,
+                                                                NSFontFaceAttribute:"Italic"])
+        let obliqueDescriptor = NSFontDescriptor(fontAttributes: [NSFontFamilyAttribute:font.familyName!,
+                                                                NSFontFaceAttribute:"Oblique"])
         #endif
         
         boldCodeFont = RPFont(descriptor: boldDescriptor, size: font.pointSize)
@@ -157,7 +157,7 @@ open class Theme {
         return returnString
     }
     
-    private func stripTheme(_ themeString : String) -> [String:[String:String]]
+    fileprivate func stripTheme(_ themeString : String) -> [String:[String:String]]
     {
         let objcString = (themeString as NSString)
         let cssRegex = try! NSRegularExpression(pattern: "(?:(\\.[a-zA-Z0-9\\-_]*(?:[, ]\\.[a-zA-Z0-9\\-_]*)*)\\{([^\\}]*?)\\})", options:[.caseInsensitive])
@@ -213,7 +213,7 @@ open class Theme {
         return returnDict
     }
     
-    private func strippedThemeToString(_ theme: RPThemeStringDict) -> String
+    fileprivate func strippedThemeToString(_ theme: RPThemeStringDict) -> String
     {
         var resultString = ""
         for (key, props) in theme {
@@ -230,7 +230,7 @@ open class Theme {
         return resultString
     }
     
-    private func strippedThemeToTheme(_ theme: RPThemeStringDict) -> RPThemeDict
+    fileprivate func strippedThemeToTheme(_ theme: RPThemeStringDict) -> RPThemeDict
     {
         var returnTheme = RPThemeDict()
         for (className, props) in theme
@@ -265,7 +265,7 @@ open class Theme {
         return returnTheme
     }
     
-    private func fontForCSSStyle(_ fontStyle:String) -> RPFont
+    fileprivate func fontForCSSStyle(_ fontStyle:String) -> RPFont
     {
         switch fontStyle
         {
@@ -278,7 +278,7 @@ open class Theme {
         }
     }
     
-    private func attributeForCSSKey(_ key: String) -> NSAttributedStringKey
+    fileprivate func attributeForCSSKey(_ key: String) -> NSAttributedStringKey
     {
         switch key {
         case "color":
@@ -294,7 +294,7 @@ open class Theme {
         }
     }
     
-    private func colorWithHexString (_ hex:String) -> RPColor
+    fileprivate func colorWithHexString (_ hex:String) -> RPColor
     {
 
         var cString:String = hex.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)

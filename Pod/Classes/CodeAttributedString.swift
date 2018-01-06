@@ -57,7 +57,7 @@ open class CodeAttributedString : NSTextStorage
     
     #if os(OSX)
     /// Initialize the CodeAttributedString
-    required public init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType)
+    required public init?(pasteboardPropertyList propertyList: Any, ofType type: String)
     {
         super.init(pasteboardPropertyList: propertyList, ofType: type)
         setupListeners()

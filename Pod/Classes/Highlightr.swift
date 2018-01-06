@@ -24,14 +24,14 @@ open class Highlightr
     /// This block will be called every time the theme changes.
     open var themeChanged : ((Theme) -> Void)?
     
-    private let jsContext : JSContext
-    private let hljs = "window.hljs"
-    private let bundle : Bundle
-    private let htmlStart = "<"
-    private let spanStart = "span class=\""
-    private let spanStartClose = "\">"
-    private let spanEnd = "/span>"
-    private let htmlEscape = try! NSRegularExpression(pattern: "&#?[a-zA-Z0-9]+?;", options: .caseInsensitive)
+    fileprivate let jsContext : JSContext
+    fileprivate let hljs = "window.hljs"
+    fileprivate let bundle : Bundle
+    fileprivate let htmlStart = "<"
+    fileprivate let spanStart = "span class=\""
+    fileprivate let spanStartClose = "\">"
+    fileprivate let spanEnd = "/span>"
+    fileprivate let htmlEscape = try! NSRegularExpression(pattern: "&#?[a-zA-Z0-9]+?;", options: .caseInsensitive)
     
     /**
      Default init method.
@@ -55,7 +55,7 @@ open class Highlightr
             return nil
         }
         
-        guard setTheme(to: "pojoaque") else
+        guard setTheme(to: "pojoaque", fontSize: 14) else
         {
             return nil
         }
@@ -70,16 +70,15 @@ open class Highlightr
      - returns: true if it was possible to set the given theme, false otherwise
      */
     @discardableResult
-    open func setTheme(to name: String) -> Bool
+    open func setTheme(to name: String, fontSize: CGFloat) -> Bool
     {
         guard let defTheme = bundle.path(forResource: name+".min", ofType: "css") else
         {
             return false
         }
         let themeString = try! String.init(contentsOfFile: defTheme)
-        theme =  Theme(themeString: themeString)
+        theme =  Theme(themeString: themeString, fontSize: fontSize)
 
-        
         return true
     }
     
@@ -111,28 +110,26 @@ open class Highlightr
         }
         
         let res = jsContext.evaluateScript(command)
-        guard var string = res!.toString() else
+        guard var string = res!.toString(), string != "undefined" else
         {
             return nil
         }
         
-        var returnString : NSAttributedString?
+        let returnString : NSAttributedString
         if(fastRender)
         {
             returnString = processHTMLString(string)!
         }else
         {
-            string = "<style>"+theme.lightTheme+"</style><pre><code class=\"hljs\">"+string+"</code></pre>"
+             string = "<style>"+theme.lightTheme+"</style><pre><code class=\"hljs\">"+string+"</code></pre>"
             let opt: [NSAttributedString.DocumentReadingOptionKey : Any] = [
              .documentType: NSAttributedString.DocumentType.html,
-             .characterEncoding: String.Encoding.utf8.rawValue
+             .characterEncoding: String.Encoding.utf8
              ]
             
-            let data = string.data(using: String.Encoding.utf8)!
-            safeMainSync
-            {
-                returnString = try? NSMutableAttributedString(data:data, options: opt, documentAttributes:nil)
-            }
+             let data = string.data(using: String.Encoding.utf8)!
+             returnString = try! NSMutableAttributedString(data:data, options: opt, documentAttributes:nil)
+
         }
         
         return returnString
@@ -167,21 +164,7 @@ open class Highlightr
     }
     
     //Private & Internal
-    /**
-     Execute block safely on main thread, execute block directly if current thread is main thread, otherwise execute block on main queue synchronously.
-     */
-    private func safeMainSync(_ block: @escaping ()->())
-    {
-        if Thread.isMainThread
-        {
-            block()
-        }else
-        {
-            DispatchQueue.main.sync { block() }
-        }
-    }
-    
-    private func processHTMLString(_ string: String) -> NSAttributedString?
+    fileprivate func processHTMLString(_ string: String) -> NSAttributedString?
     {
         let scanner = Scanner(string: string)
         scanner.charactersToBeSkipped = nil
